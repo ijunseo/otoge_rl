@@ -1,0 +1,53 @@
+#
+# otoge_rl_project: pyproject.toml
+#
+# このファイルは `uv` および `pip` がプロジェクトを正しく認識し、
+# 依存関係を管理するために使用される中心的な設定ファイルです。
+# PEP 621 に準拠しています。
+#
+
+[project]
+# プロジェクトの基本情報
+name = "otoge_rl_agent"
+version = "0.1.0"
+description = "強化学習（RL）によるリズムゲームエージェントプロジェクト"
+readme = "README.md"
+requires-python = ">=3.10"  # Python 3.10 以上を要求
+
+# プロジェクトの主要な依存関係
+# `uv pip install .` または `uv sync` でインストールされます。
+dependencies = [
+    "gymnasium",
+    "pygame",
+    "numpy",
+    "stable-baselines3[extra]", # PPO, CnnPolicy, VecFrameStackなどに必要
+    "tensorboard",              # 学習ログの可視化
+    "imageio",                  # 評価ビデオの保存
+    "imageio-ffmpeg",           # .mp4 形式のサポート
+    "matplotlib",               # 学習結果のグラフ描画
+    "torch",                    # stable-baselines3 のバックエンド
+    "pyyaml",                   # config.yaml のロード (V5以降の計画で使用)
+    "pyjson"                    # .json 設定ファイルのロード
+]
+
+# オプションの依存関係（開発用）
+# `uv pip install -e .[dev]` でインストールされます。
+[project.optional-dependencies]
+dev = [
+    "ruff"  # 高速な Linter（コード検査）兼 Formatter（コード整形）
+]
+
+# プロジェクトの構造を `uv` と `setuptools` に伝えます。
+[tool.setuptools.packages.find]
+where = ["src"]  # ソースコードが 'src' ディレクトリ配下にあることを指定 (src-layout)
+
+# Ruff (Linter/Formatter) の設定
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]  # 基本的なエラー、未使用のインポート、警告を選択
+
+[tool.ruff.format]
+quote-style = "double"  # 引用符のスタイルをダブルクォートに統一

@@ -1,0 +1,177 @@
+#
+# otoge_rl_project: uv.lock
+#
+# このファイルは `uv sync` または `uv pip install` によって自動生成・管理されます。
+# プロジェクトの依存関係ツリーにある全てのパッケージの正確なバージョンを記録します。
+# これにより、どの環境でも（ローカル、CI、本番）全く同じバージョンのライブラリが
+# インストールされることを保証し、「再現性(reproducibility)」を確保します。
+#
+# !!! 注: これは `pyproject.toml` に基づく現実的なロックファイルの構造例です。
+#         ハッシュ値 (`sha256`) は `uv` によって自動計算されるため、ここでは省略しています。
+#
+version = 1
+requires-python = ">=3.10"
+
+#
+# --- メイン依存関係 (Main Dependencies) ---
+#
+
+[[package]]
+name = "stable-baselines3"
+version = "2.3.2"
+dependencies = [
+  "cloudpickle",
+  "gymnasium >=0.28.1",
+  "matplotlib",
+  "numpy",
+  "pandas",
+  "pillow",
+  "torch >=1.13",
+]
+# [[file]]
+# name = "stable_baselines3-2.3.2-py3-nWone-any.whl"
+# sha256 = "..."
+
+[[package]]
+name = "gymnasium"
+version = "1.2.0" # (Jupyter Notebook からのバージョン例)
+dependencies = [
+  "cloudpickle >=1.2.0",
+  "farama-notifications >=0.0.1",
+  "numpy >=1.21.0",
+  "pygame", # (extra 'box2d' に含まれることが多い)
+  "typing-extensions >=4.3.0",
+]
+# [[file]]
+# name = "gymnasium-1.2.0-py3-none-any.whl"
+# sha256 = "..."
+
+[[package]]
+name = "torch"
+version = "2.4.0" # (例)
+dependencies = [
+  "filelock",
+  "jinja2",
+  "networkx",
+  "sympy",
+  "typing-extensions",
+]
+# [[file]]
+# name = "torch-2.4.0-cp311-cp311-manylinux2014_x86_64.whl"
+# sha256 = "..."
+
+[[package]]
+name = "pyyaml"
+version = "6.0.1" # (例)
+# [[file]]
+# name = "PyYAML-6.0.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+# sha256 = "..."
+
+[[package]]
+name = "pyjson"
+version = "1.4.1" # (例)
+# [[file]]
+# name = "pyjson-1.4.1.tar.gz"
+# sha256 = "..."
+
+[[package]]
+name = "imageio"
+version = "2.34.2" # (例)
+dependencies = [
+  "numpy",
+  "pillow >=8.3.2",
+]
+# [[file]]
+# name = "imageio-2.34.2-py3-none-any.whl"
+# sha256 = "..."
+
+[[package]]
+name = "imageio-ffmpeg"
+version = "0.5.1" # (例)
+# [[file]]
+# name = "imageio_ffmpeg-0.5.1-py3-none-manylinux2010_x86_64.whl"
+# sha256 = "..."
+
+[[package]]
+name = "matplotlib"
+version = "3.10.0" # (例)
+dependencies = [
+  "contourpy >=1.0.1",
+  "cycler >=0.10",
+  "fonttools >=4.22.0",
+  "kiwisolver >=1.3.1",
+  "numpy >=1.23",
+  "packaging >=20.0",
+  "pillow >=8.0",
+  "pyparsing >=3.0.1",
+  "python-dateutil >=2.7",
+]
+# [[file]]
+# name = "matplotlib-3.10.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+# sha256 = "..."
+
+#
+# --- 開発用依存関係 (Development Dependencies) ---
+#
+
+[[package]]
+name = "ruff"
+version = "0.5.5" # (例)
+# [[file]]
+# name = "ruff-0.5.5-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+# sha256 = "..."
+
+#
+# --- 推移的依存関係 (Transitive Dependencies) ---
+# (上記パッケージが依存する、その他のパッケージ群)
+#
+
+[[package]]
+name = "numpy"
+version = "1.26.4" # (torch, sb3, gymnasium などが共通で依存)
+# [[file]]
+# name = "numpy-1.26.4-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+# sha256 = "..."
+
+[[package]]
+name = "pygame"
+version = "2.6.0" # (gymnasium が依存)
+# [[file]]
+# name = "pygame-2.6.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+# sha256 = "..."
+
+[[package]]
+name = "cloudpickle"
+version = "3.0.0" # (sb3, gymnasium が依存)
+# [[file]]
+# name = "cloudpickle-3.0.0-py3-none-any.whl"
+# sha256 = "..."
+
+[[package]]
+name = "pillow"
+version = "10.4.0" # (sb3, matplotlib が依存)
+# [[file]]
+# name = "pillow-10.4.0-cp311-cp311-manylinux_2_28_x86_64.whl"
+# sha256 = "..."
+
+[[package]]
+name = "pandas"
+version = "2.2.2" # (sb3 が依存)
+dependencies = [
+  "numpy >=1.23.2",
+  "python-dateutil >=2.8.2",
+  "pytz >=2020.1",
+  "tzdata >=2022.1",
+]
+# [[file]]
+# name = "pandas-2.2.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+# sha256 = "..."
+
+[[package]]
+name = "typing-extensions"
+version = "4.12.2" # (gymnasium, torch が依存)
+# [[file]]
+# name = "typing_extensions-4.12.2-py3-none-any.whl"
+# sha256 = "..."
+
+
