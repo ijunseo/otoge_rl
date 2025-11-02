@@ -1,44 +1,42 @@
 #
 # otoge_rl_project: src/play_random.py
 #
+# (V9.3)
 # このファイルは、Jupyter Notebook (Cell 4) のランダムエージェントテストを
-# 実行可能スクリプトとして移植したものです。
-# 'uv run python -m play_random' で実行されます。
+# Python スクリプトとして実行します。
+# 'uv run python src/play_random.py' で実行されます。
 #
 # 機能:
-# 1. 'human' モードで Pygame ウィンドウを開き、環境が視覚的に正しく
-#    動作するかをテストします。
-# 2. Gymnasium 標準の env_checker を実行し、環境が標準仕様に
-#    準拠しているかを確認します。
+# 1. `rhythm_game/config.json` をロードします。
+# 2. `RhythmGameEnv` を 'human' モードで直接インスタンス化します。
+# 3. 環境が終了するまでランダムなアクションを実行し、Pygame ウィンドウに表示します。
+# 4. (V9.3) `make_env` を使用せず、`RhythmGameEnv` を直接呼び出します。
 #
 
 import gymnasium as gym
-from gymnasium.utils.env_checker import check_env
-import json
 import logging
+import json
 import sys
+import time
 
 # `src` が PYTHONPATH にあるため、'rhythm_game' を直接インポート
-try:
-    from rhythm_game import RhythmGameEnv
-except ImportError:
-    logging.error("エラー: 'rhythm_game' モジュールが見つかりません。")
-    sys.exit(1)
+from rhythm_game import RhythmGameEnv
+
+# (V9.3) utils.py (make_env) は RL 学習/評価専用のため、ここでは使用しない
 
 def setup_logging():
-    """コンソールログの基本設定を行います。"""
+    """コンソールログ (INFO レベル) の基本設定を行います。"""
     logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    logging.info("--- [V9.3] Otoge RL Agent ランダムテスト開始 ---")
 
 def load_game_config() -> dict:
     """
-    ゲーム設定 JSON ファイルをロードします。
-
-    Returns:
-        dict: game_config
+    rhythm_game の JSON 設定ファイルをロードします。
     """
     try:
         with open("src/rhythm_game/config.json", 'r', encoding='utf-8') as f:
-            return json.load(f)
+            game_config = json.load(f)
+        return game_config
     except FileNotFoundError as e:
         logging.error(f"設定ファイル (src/rhythm_game/config.json) が見つかりません: {e}")
         sys.exit(1)
@@ -49,65 +47,56 @@ def main():
     """
     setup_logging()
     game_cfg = load_game_config()
-    
-    density = 'high' # テスト用の密度 (ハードコード)
-    seed = 42        # テスト用シード (ハードコード)
 
-    # --- 1. Gymnasium 標準チェック (Cell 4) ---
-    logging.info("--- Gymnasium 環境標準チェック開始 (レンダリングなし) ---")
+    # (V9.3) render_mode='human' で環境を直接生成
     try:
-        env_check = RhythmGameEnv(game_config=game_cfg, density=density, render_mode=None)
-        check_env(env_check)
-        logging.info("✅ Gymnasium 環境標準チェックに合格しました！")
+        env = RhythmGameEnv(
+            game_config=game_cfg,
+            density=game_cfg.get("density_settings", {}).get("default", "medium"),
+            render_mode='human'
+        )
+        logging.info("'human' モードで環境を正常に作成しました。Pygame ウィンドウを確認してください。")
     except Exception as e:
-        logging.error(f"❌ 環境標準チェックに失敗しました: {e}")
-        # チェックに失敗しても、視覚テストのために続行する場合があります
-        # sys.exit(1) 
-    finally:
-        env_check.close()
+        logging.error(f"環境の作成に失敗しました: {e}", exc_info=True)
+        return
 
-
-    # --- 2. ランダムエージェントによる視覚テスト (Cell 4) ---
-    logging.info(f"\n--- ランダムエージェントのテスト開始 (Density: {density}, Seed: {seed}) ---")
-    logging.info("Pygame ウィンドウが開き、1エピソードが終了するまで実行されます...")
-    
-    env = None
     try:
-        # 'human' モードで環境を初期化
-        env = RhythmGameEnv(game_config=game_cfg, density=density, render_mode='human')
-        observation, info = env.reset(seed=seed)
-
+        # (V8.6) Jupyter Notebook (Cell 4) と同様にシード 42 でリセット
+        observation, info = env.reset(seed=42)
+        
         done = False
         truncated = False
-        total_rl_score = 0
-        total_game_score = 0
         frame_count = 0
 
         while not done and not truncated:
-            action = env.action_space.sample()  # ランダムな行動を選択
-            observation, reward, done, truncated, info = env.step(action)
+            # ランダムな行動を選択 (0..4)
+            action = env.action_space.sample() 
             
-            total_rl_score += reward
+            observation, reward, done, truncated, info = env.step(action)
             frame_count += 1
             
-            # 報酬が発生した時のみログを出力 (Cell 4 のロジック)
+            score = info.get('game_score', 0.0)
+
+            # (V8.6) 報酬が発生した時（またはミス時）のみログを出力
             if reward != 0:
-                print(f"フレーム: {frame_count}, 行動: {action}, RL報酬: {reward:.1f}, "
-                      f"現在のRL合計: {info.get('rl_score', 0.0):.1f}, "
-                      f"現在のGameスコア: {info.get('game_score', 0.0):.1f}")
-        
-        logging.info("\n--- エピソード終了 ---")
-        logging.info(f"合計フレーム: {frame_count}")
-        logging.info(f"最終 RL スコア: {info.get('rl_score', 0.0):.1f}")
-        logging.info(f"最終 Game スコア: {info.get('game_score', 0.0):.1f} / {info.get('max_score', 0.0):.1f}")
+                logging.info(f"フレーム: {frame_count}, 行動: {action}, 報酬: {reward:.1f}, 現在の合計スコア: {score:.1f}")
+            
+            # (V8.6) render_mode='human' の場合、env.step() が描画を処理します
 
+    except KeyboardInterrupt:
+        logging.warning("ユーザーによりテストが中断されました。")
     except Exception as e:
-        logging.error(f"ランダムエージェントの実行中にエラーが発生しました: {e}")
+        logging.error(f"ランダムエージェントの実行中にエラーが発生しました: {e}", exc_info=True)
     finally:
-        if env:
-            env.close() # Pygame ウィンドウを閉じる
-        logging.info("--- テスト終了 (環境クローズ済み) ---")
+        if 'env' in locals():
+            final_score = env.get_info().get('game_score', 0.0)
+            logging.info("--- エピソード終了 ---")
+            logging.info(f"合計フレーム: {frame_count}")
+            logging.info(f"最終スコア: {final_score:.1f}")
+            env.close()
+            logging.info("Pygame ウィンドウを閉じました。")
+            logging.info("--- [V9.3] ランダムテスト終了 ---")
 
-# 'uv run python -m play_random' で実行されるためのエントリーポイント
 if __name__ == "__main__":
     main()
+

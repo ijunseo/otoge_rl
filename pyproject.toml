@@ -1,53 +1,68 @@
 #
 # otoge_rl_project: pyproject.toml
 #
-# このファイルは `uv` および `pip` がプロジェクトを正しく認識し、
-# 依存関係を管理するために使用される中心的な設定ファイルです。
-# PEP 621 に準拠しています。
+# V9.2 計画
+# このファイルは `uv` に対するプロジェクトのメタデータと依存関係を定義します。
+# 1. `[project]` : プロジェクトの基本情報。
+# 2. `[project.dependencies]` :
+#    - V8.7: `torch` を明示的に追加 (uv の競合状態を避けるため)。
+#    - V9.2: `tensorboard`, `tqdm`, `rich` を追加 (V8.7 での欠落を修正)。
+#    - V8.3: `opencv-python`, `ale-py` を追加 (sb3[extra] の代替)。
+# 3. `[project.optional-dependencies]` : `dev` グループに `ruff` (Linter/Formatter) を定義します。
+# 4. `[tool.setuptools.packages.find]` : `src` レイアウト (`src/otoge_rl_agent`) を uv が
+#    正しく認識できるように設定します。
 #
 
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
-# プロジェクトの基本情報
 name = "otoge_rl_agent"
 version = "0.1.0"
-description = "強化学習（RL）によるリズムゲームエージェントプロジェクト"
+description = "強化学習 (PPO) を用いたリズムゲームエージェント (V9.2 計画)"
 readme = "README.md"
-requires-python = ">=3.10"  # Python 3.10 以上を要求
+requires-python = ">=3.10" # PyTorch 2.x+ および SB3 の要件に基づ
 
-# プロジェクトの主要な依存関係
-# `uv pip install .` または `uv sync` でインストールされます。
+# --- (V9.2) 必須の依存関係 ---
+# V8.7: `torch` を明示的に含める
+# V9.2: `tensorboard`, `tqdm`, `rich` を追加
 dependencies = [
-    "gymnasium",
-    "pygame",
-    "numpy",
-    "stable-baselines3[extra]", # PPO, CnnPolicy, VecFrameStackなどに必要
-    "tensorboard",              # 学習ログの可視化
-    "imageio",                  # 評価ビデオの保存
-    "imageio-ffmpeg",           # .mp4 形式のサポート
-    "matplotlib",               # 学習結果のグラフ描画
-    "torch",                    # stable-baselines3 のバックエンド
-    "pyyaml",                   # config.yaml のロード (V5以降の計画で使用)
-    "pyjson"                    # .json 設定ファイルのロード
+    # 強化学習 (RL) コア
+    "stable-baselines3>=2.0.0",
+    "gymnasium>=1.2.1",       # (Jupyter Notebook で 1.2.0 を使用していたため)
+    "torch>=2.0.0",           # (V8.7) GPU版のインストールを容易にするため明示
+    "tensorboard",            # (V8.5) TensorBoard ロギングに必要
+    "tqdm",                   # (V9.2) `progress_bar=True` に必要
+    "rich",                   # (V9.2) `progress_bar=True` に必要
+
+    # ゲーム環境
+    "pygame>=2.6.0",
+
+    # ユーティリティ
+    "numpy>=1.21.0",
+    "pyyaml",                 # .json / .yaml 設定ファイル読み込み用
+    "imageio",                # evaluate.py での動画保存用
+    "imageio-ffmpeg",         # 動画保存用 (ffmpeg)
+    "matplotlib",             # main.py でのグラフ保存用
+
+    # (V8.3) sb3[extra] の代替 (torch, tensorboard, tqdm, rich 以外)
+    "opencv-python",
+    "ale-py"
 ]
 
-# オプションの依存関係（開発用）
-# `uv pip install -e .[dev]` でインストールされます。
+# --- (V6) 開発用の依存関係 ---
 [project.optional-dependencies]
 dev = [
-    "ruff"  # 高速な Linter（コード検査）兼 Formatter（コード整形）
+    "ruff"  # Linter (lint) 兼 Formatter (fmt)
 ]
 
-# プロジェクトの構造を `uv` と `setuptools` に伝えます。
+# --- (V7) `src` レイアウト設定 ---
+# `uv pip install -e .` が `src` フォルダを PYTHONPATH のルートとして
+# 認識するように設定します。
 [tool.setuptools.packages.find]
-where = ["src"]  # ソースコードが 'src' ディレクトリ配下にあることを指定 (src-layout)
+where = ["src"]
 
-# Ruff (Linter/Formatter) の設定
-[tool.ruff]
-line-length = 88
-target-version = "py310"
+[project.urls]
+"Repository" = "https://github.com/(ユーザー名)/(リポジトリ名)" # (後で更新してください)
 
-[tool.ruff.lint]
-select = ["E", "F", "W", "I"]  # 基本的なエラー、未使用のインポート、警告を選択
-
-[tool.ruff.format]
-quote-style = "double"  # 引用符のスタイルをダブルクォートに統一
