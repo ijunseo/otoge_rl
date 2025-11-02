@@ -8,6 +8,4 @@
 
 from .env import RhythmGameEnv
 
-__all__ = [
-    "RhythmGameEnv"
-]
+__all__ = ["RhythmGameEnv"]

@@ -13,7 +13,6 @@
 #
 
 import gymnasium as gym
-import os
 
 # Stable Baselines3 Wrappers
 # (V9.3) Monitor は main.py/evaluate.py で管理するため、ここではインポートしない
@@ -30,12 +29,13 @@ EVAL_SEED_BASE = 42
 
 # --- 2. (V9.3) make_env ヘルパー関数 ---
 
+
 def make_env(
     game_config: dict,
     density: str,
     resized_shape: tuple[int, int],
     rank: int,
-    seed_base: int = 0
+    seed_base: int = 0,
 ) -> callable:
     """
     (V9.3) Stable Baselines3 の VecEnv (DummyVecEnv) 用の
@@ -51,25 +51,25 @@ def make_env(
     Returns:
         callable: 引数を取らない環境初期化関数 (_init)。
     """
+
     def _init() -> gym.Env:
-        """ VecEnv が呼び出す内部初期化関数 """
+        """VecEnv が呼び出す内部初期化関数"""
         # (V8.6) 決定論的な動作のため、ランクに基づきシードを設定
         seed = seed_base + rank
         set_random_seed(seed)
-        
+
         # (V9.3) game_config を RhythmGameEnv に渡す
         env = RhythmGameEnv(
             game_config=game_config,
             density=density,
-            render_mode=None # 学習/評価中は 'rgb_array' または 'human' を使用しない
+            render_mode=None,  # 学習/評価中は 'rgb_array' または 'human' を使用しない
         )
-        
+
         # (V8.6) CnnPolicy のために観測をリサイズ (H, W, 1)
         # (V9.3) Monitor は VecEnv の外側でラップするため、ここでは適用しない
         env = ResizeObservation(env, shape=resized_shape)
         env = ReshapeObservation(env, shape=(resized_shape[0], resized_shape[1], 1))
-        
-        return env
-    
-    return _init
 
+        return env
+
+    return _init

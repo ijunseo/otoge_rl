@@ -10,6 +10,7 @@
 import numpy as np
 from stable_baselines3.common.callbacks import BaseCallback, EvalCallback
 
+
 # --- 学習報酬ロガー (Cell 2/5) ---
 class TrainingRewardLogger(BaseCallback):
     """
@@ -19,6 +20,7 @@ class TrainingRewardLogger(BaseCallback):
     Args:
         verbose (int): 冗長レベル。
     """
+
     def __init__(self, verbose: int = 0):
         super().__init__(verbose)
         self.t = []
@@ -38,8 +40,10 @@ class TrainingRewardLogger(BaseCallback):
                     self.rew.append(ep["r"])
         return True
 
+
 # --- 評価用シード (Cell 5) ---
 EVAL_SEED_BASE = 2025
+
 
 # --- 正解率付き評価コールバック (Cell 2/5) ---
 class EvalWithAccuracy(EvalCallback):
@@ -49,6 +53,7 @@ class EvalWithAccuracy(EvalCallback):
 
     正解率 = 各エピソードの (game_score / max_score) * 100 の平均。
     """
+
     def __init__(self, eval_env, *args, n_eval_episodes=5, **kwargs):
         super().__init__(eval_env, *args, n_eval_episodes=n_eval_episodes, **kwargs)
         self.eval_steps = []
@@ -64,8 +69,8 @@ class EvalWithAccuracy(EvalCallback):
         # eval_freq ごとに評価が実行されたかチェック
         if self.eval_freq > 0 and (self.n_calls % self.eval_freq == 0):
             acc_list = []
-            gs_list = [] # Game Score リスト
-            
+            gs_list = []  # Game Score リスト
+
             for ep in range(self.n_eval_episodes):
                 # Gymnasium/VecEnv の reset と互換
                 try:
@@ -82,13 +87,13 @@ class EvalWithAccuracy(EvalCallback):
 
                 # VecEnv の場合、infos はリスト
                 info = infos[0] if isinstance(infos, (list, tuple)) else infos
-                
+
                 gs = info.get("game_score", None)
                 ms = info.get("max_score", None)
-                
+
                 if gs is not None:
                     gs_list.append(float(gs))
-                    
+
                 if gs is not None and ms and ms > 0:
                     acc_list.append(100.0 * float(gs) / float(ms))
 

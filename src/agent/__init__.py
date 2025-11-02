@@ -8,9 +8,4 @@
 from .callbacks import TrainingRewardLogger, EvalWithAccuracy, EVAL_SEED_BASE
 from .utils import make_env
 
-__all__ = [
-    "TrainingRewardLogger",
-    "EvalWithAccuracy",
-    "EVAL_SEED_BASE",
-    "make_env"
-]
+__all__ = ["TrainingRewardLogger", "EvalWithAccuracy", "EVAL_SEED_BASE", "make_env"]
