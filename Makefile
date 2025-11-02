@@ -1,40 +1,54 @@
 #
 # otoge_rl_project: Makefile
 #
-# このファイルは、プロジェクトのセットアップ、コード品質管理（リント、フォーマット）など、
-# 頻繁に使用するコマンドを標準化するために使用されます。
-# CI/CD パイプラインとローカル開発環境の両方で一貫した操作を提供します。
+# (V9.4) 修正:
+# 1. 'install' ターゲットを README.md (V9.4) の 5.A ステップと一致させます。
+# 2. CI 環境 (GPU不要) のための 'install-ci' ターゲットを維持します。
+# 3. (重要) CUDA バージョンを 'make' 実行時に動的に指定できるように変更します。
+#    例: make install CUDA_VERSION=cu128 (デフォルト)
+#    例: make install CUDA_VERSION=cu118 (古いドライバ用)
 #
 
-# .PHONY: ターゲットが実際のファイル名と衝突しないように設定
-.PHONY: help install lint fmt check-fmt
+# PyTorch の CUDA バージョンを変数として定義
+# 5070 Ti (CUDA 12.9) 環境に基づき、'cu128' をデフォルト (default) に設定
+# '?=' は、変数が指定されなかった場合のみこの値を採用することを意味します。
+CUDA_VERSION ?= cu128
+PYTORCH_INDEX_URL = https://download.pytorch.org/whl/$(CUDA_VERSION)
 
-# デフォルトターゲット (例: `make`)
-help:
-	@echo "利用可能なコマンド:"
-	@echo "  make install    - uv を使用して、プロジェクトと開発用の依存関係をインストールします。"
-	@echo "  make lint       - ruff を使用して、コードの静的解析（リント）を実行します。"
-	@echo "  make fmt        - ruff を使用して、コードを自動整形します。（ローカル用）"
-	@echo "  make check-fmt  - ruff を使用して、コードの整形が必要かチェックします。（CI用）"
+.PHONY: install install-ci lint fmt check-fmt
 
-# 依存関係のインストール (uv sync を使用して uv.lock に基づく)
+# [V9.4] 修正: ローカル開発環境 (Windows/macOS) 用のインストール
+# (README 5.A, ステップ 5.1 + 5.2 と一致)
 install:
-	@echo "--- 依存関係を 'pyproject.toml' と 'uv.lock' からインストールします ---"
+	@echo "--- [V9.4] ステップ 5.1: GPU 版 PyTorch ($(CUDA_VERSION)) をインストールします ---"
+	uv pip install torch --index-url $(PYTORCH_INDEX_URL)
+	@echo "--- [V9.4] ステップ 5.2: プロジェクトの依存関係 (dev) をインストールします ---"
 	uv pip install -e .[dev]
 
-# Linter (コード検査)
+# [V9.3] CI (Linux) 環境用のインストール
+# (GPUは不要なため、標準 (CPU版) PyTorch をインストールします)
+install-ci:
+	@echo "--- [V9.3] CI 環境 (CPU) 用の PyTorch をインストールします ---"
+	uv pip install torch
+	@echo "--- [V9.3] CI 環境用の依存関係 (dev) をインストールします ---"
+	uv pip install -e .[dev]
+
+# -----------------------------------------------------------------
+# (V8.5 と同様) Ruff を使用した Lint と Fmt
+# -----------------------------------------------------------------
+
+# ruff を使用したリンティング (コードエラーのチェック)
 lint:
-	@echo "--- Linter (ruff check) を実行します ---"
+	@echo "--- 'ruff check' (Lint) を実行中... ---"
 	uv run ruff check src/
 
-# Formatter (コード整形) - ローカル用
-# このコマンドはファイルを直接変更します。
+# ruff を使用したフォーマット (コードスタイルの自動修正)
 fmt:
-	@echo "--- Formatter (ruff format) を実行し、ファイルを修正します ---"
+	@echo "--- 'ruff format' (Format) を実行中... ---"
 	uv run ruff format src/
 
-# Formatter Check (整形検査) - CI用
-# このコマンドはファイルを変更せず、整形が必要な場合はエラーを返します。
+# ruff を使用したフォーマットチェック (CI用: 修正せずにチェックのみ)
 check-fmt:
-	@echo "--- Formatter (ruff format --check) を実行し、整形が必要かチェックします ---"
+	@echo "--- 'ruff format --check' (Format Check) を実行中... ---"
 	uv run ruff format --check src/
+
