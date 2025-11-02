@@ -1,6 +1,6 @@
 # Otoge RL Agent (強化学習リズムゲームエージェント)
 
-Jupyter Notebook でプロトタイピングされた強化学習リズムゲームエージェントを、再現性と拡張性を備えた Python プロジェクトにリファクタリングしたものです。
+Jupyter Notebook でプロトタイピングされた強化学習リズムゲームエージェントを、再現性と拡張性を備えた Python プロジェクト（V9.4計画）にリファクタリングしたものです。
 
 このプロジェクトは `uv` による高速な依存関係管理、`JSON` による設定分離、`GitHub Actions` による CI/CD、そして動的な `CLI` オーバーライドを特徴としています。
 
@@ -14,7 +14,7 @@ Jupyter Notebook でプロトタイピングされた強化学習リズムゲー
 
 松尾研究室の深層強化学習講義で、エージェントの学習に使用するユーザーデータ（例：乱暴なユーザー、マナーの良いユーザー）の傾向によって、学習後のエージェントの振る舞いが変わるという知見に触発されました。
 
-これをリズムゲームに応用し、以下の仮説を検証することを目的としています。
+これをリズムゲームに応용し、以下の仮説を検証することを目的としています。
 
 1. **仮説1:** 非常に難しいパターン（高密度）のみで学習させたエージェントは、簡単な譜面も完璧に（あるいは人間以上に）プレイできるか？
     
@@ -23,9 +23,9 @@ Jupyter Notebook でプロトタイピングされた強化学習リズムゲー
 
 このリポジトリは、これらの仮説を迅速に検証し、考察するためのアジャイルな開発環境です。
 
-## 2. プロジェクト構造 (V-Final)
+## 2. プロジェクト構造
 
-V8, V9 計画を経て、以下の `src-layout` 構造に最適化されています。
+V9.4 計画に基づき、以下の `src-layout` 構造に最適化されています。
 
 ```
 otoge_rl_project/
@@ -35,22 +35,22 @@ otoge_rl_project/
 │
 ├── src/                     # (Source) Python モジュールルート
 │   ├── agent/               # (モジュール 1) PPO エージェントと学習ロジック
-│   │   ├── __init__.py      #              - callbacks, utils を 'agent' パッケージレベルで公開
-│   │   ├── callbacks.py     #              - 学習/評価のカスタムコールバック
+│   │   ├── __init__.py
+│   │   ├── callbacks.py
 │   │   ├── ppo_config.json  #              - (設定 1) PPO ハイパーパラメータの "基本値"
-│   │   └── utils.py         #              - make_env ヘルパー (環境ラッパー)
+│   │   └── utils.py
 │   │
 │   ├── rhythm_game/         # (モジュール 2) リズムゲーム環境ロジック
-│   │   ├── __init__.py      #              - RhythmGameEnv を 'rhythm_game' パッケージレベルで公開
+│   │   ├── __init__.py
 │   │   ├── config.json      #              - (設定 2) ゲームルール/スコアの "基本値"
-│   │   └── env.py           #              - RhythmGameEnv クラスの実装
+│   │   └── env.py
 │   │
 │   ├── main.py              # (メイン実行 1) 学習スクリプト
 │   ├── evaluate.py          # (メイン実行 2) 評価・動画保存スクリプト
 │   └── play_random.py       # (メイン実行 3) ランダムテスト用スクリプト
 │
 ├── .gitignore               # Git 無視リスト (outputs/, .venv/, *.mp4 など)
-├── Makefile                 # (CI/CD) 'make lint', 'make fmt' コマンド定義 (ruff)
+├── Makefile                 # (CI/CD) 'make install CUDA_VERSION=...' コマンド定義
 ├── pyproject.toml           # (設定 3) uv 依存関係管理 (stable-baselines3, ruff, torch)
 ├── README.md                # (本文書)
 └── uv.lock                  # 'uv pip install' で自動生成されるロックファイル
@@ -58,20 +58,20 @@ otoge_rl_project/
 
 ## 3. (必須) NVIDIA ドライバの確認
 
-本プロジェクトは `torch` (PyTorch) の CUDA (GPU) 版を使用します。最新の `torch` ビルド (`cu124+`) は、最新の NVIDIA ドライバを必要とします。
+本プロジェクトは `torch` (PyTorch) の CUDA (GPU) 版を使用します。
 
-1. PowerShell またはコマンドプロンプトで `nvidia-smi` を実行します。
+1. PowerShell で `nvidia-smi` を実行し、`Driver Version` と `CUDA Version` を確認します。 _(例: 5070 Ti の場合、Driver 576.97, CUDA 12.9)_
     
-2. `Driver Version: 550.xx` (またはそれ以上) および `CUDA Version: 12.4+` (例: 12.9) が表示されることを確認してください。
+2. `CUDA Version` が PyTorch の要求バージョン (例: 12.8) より高いことを確認してください。
     
-3. もしドライバが古い場合 (`53x.xx` など)、[NVIDIA 公式サイト](https://www.nvidia.com/Download/index.aspx "null") または GeForce Experience から 5000 シリーズ (5070 Ti) 用の最新ドライバをインストールし、**システムを再起動**してください。
+3. もしドライバが古い場合 (`53x.xx` など)、[NVIDIA 公式サイト](https://www.nvidia.com/Download/index.aspx "null")から最新ドライバをインストールし、**システムを再起動**してください。
     
 
 ## 4. 開発ワークフロー: インストールと実行
 
 ### A. 環境構築 (初回のみ)
 
-V9.1 計画に基づき、GPU (`torch`) と `uv` の依存関係競合を避けるため、以下の **5 ステップ** を順守してください。
+V9.4 計画に基づき、GPU (`torch`) と `uv` の依存関係競合を避けるため、以下の **5 ステップ** を順守してください。
 
 **1. リポジトリのクローンと移動** (重要: OneDrive や Dropbox フォルダを避け、`C:\dev\` のような短い ASCII パスにクローンしてください)
 
@@ -99,13 +99,18 @@ uv venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-**5. (必須) V9.1 依存関係のインストール (2段階プロセス)** (GPU `torch` を先にインストールし、その後 `pyproject.toml` の残りをインストールします)
+**5. (必須) V9.4 依存関係のインストール (2段階プロセス)** (GPU `torch` を先にインストールし、その後 `pyproject.toml` の残りをインストールします)
 
 ```
 # (otoge_rl) PS C:\dev\otoge_rl>
-# ステップ 5.1: GPU 版 PyTorch (cu124+) を先にインストール
-# (NVIDIA ドライバが 550.xx+ (CUDA 12.4+) である必要があります)
-uv pip install torch --index-url [https://download.pytorch.org/whl/cu124](https://download.pytorch.org/whl/cu124)
+# ステップ 5.1: GPU 版 PyTorch (cu128) を先にインストール
+#
+# (V9.4 重要): 以下の 'cu128' は、NVIDIA ドライバ (CUDA 12.9) に基づく例です。
+# 自身の 'nvidia-smi' の CUDA Version に合わせて、
+# cu124 (CUDA 12.4+), cu121 (CUDA 12.1+), cu118 (CUDA 11.8) などを
+# [PyTorch 公式サイト](https://pytorch.org/get-started/locally/) で確認し、URL を変更してください。
+#
+uv pip install torch --index-url [https://download.pytorch.org/whl/cu128](https://download.pytorch.org/whl/cu128)
 
 # ステップ 5.2: プロジェクトの残りの依存関係 (SB3, Ruff, Pygame など) をインストール
 uv pip install -e .[dev]
@@ -113,7 +118,7 @@ uv pip install -e .[dev]
 
 ### B. 学習の実行 (`main.py`)
 
-`uv run` は `src` フォルダを `PYTHONPATH` として自動的に認識します。`--output_path` は必須です。
+`uv run` は `src` フォルダを `PYTHONPATH` として自動的に認識します。
 
 **1. 基本的な学習 (JSON のデフォルト値を使用)**
 
@@ -127,6 +132,7 @@ uv run python src/main.py --output_path "outputs/exp_001_baseline" --device auto
 
 ```
 # (otoge_rl) PS C:\dev\otoge_rl>
+# PowerShell の複数行コマンド (バックティック `)
 uv run python src/main.py `
     --output_path "outputs/exp_002_gamma_095" `
     --total_timesteps 2000000 `
@@ -136,8 +142,6 @@ uv run python src/main.py `
 ```
 
 ### C. 学習済みモデルの評価 (`evaluate.py`)
-
-`--run_path` に `main.py` で使用した `output_path` を指定します。
 
 ```
 # (otoge_rl) PS C:\dev\otoge_rl>
