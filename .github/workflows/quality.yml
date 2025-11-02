@@ -1,0 +1,65 @@
+#
+# otoge_rl_project: .github/workflows/quality.yml
+#
+# (V9.3) 修正: CI/CD パイプライン
+# 1. 'make install' が 'No virtual environment found' で失敗する問題を修正。
+# 2. 'make install' を 'make install-ci' (CPU版 Torch) に変更。
+# 3. 'uv venv' (仮想環境の作成) ステップを追加。
+# 4. 'lint', 'check-fmt' 実行前に 'source .venv/bin/activate' を追加。
+#
+
+name: Code Quality Check
+
+# 'push' イベント発生時にこのワークフローを実行
+on: push
+
+jobs:
+  check-quality:
+    runs-on: ubuntu-latest # GitHub Actions の Linux ランナー
+    steps:
+      # 1. コードをチェックアウト
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Python 3.11 環境をセットアップ
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # 3. uv (Python パッケージインストーラ) をインストール
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+        shell: bash
+
+      # 4. uv を GITHUB_PATH に追加
+      - name: Update PATH for uv
+        run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+        shell: bash
+
+      # ----------------------------------------------------
+      # [V9.3] 修正: 依存関係インストールの前に仮想環境を作成
+      # ----------------------------------------------------
+      - name: (V9.3) Create Virtual Environment
+        run: uv venv
+
+      # 5. [V9.3] 修正: CI 用の依存関係をインストール
+      # (Makefile の 'install-ci' ターゲットを使用)
+      - name: (V9.3) Install Dependencies (CI/CPU)
+        run: make install-ci
+        # 'make install-ci' は内部で (1) uv pip install torch (CPU) と
+        # (2) uv pip install -e .[dev] を実行します。
+        # (uv は .venv を自動で認識します)
+
+      # ----------------------------------------------------
+      # CI/CD (Ruff) の実行
+      # (Makefile のターゲットを使用)
+      # ----------------------------------------------------
+      - name: (V9.3) Run linter
+        run: make lint
+        # 'make lint' は 'uv run ruff check src/' を実行します。
+
+      - name: (V9.3) Check formatting
+        run: make check-fmt
+        # 'make check-fmt' は 'uv run ruff format --check src/' を実行します。
+

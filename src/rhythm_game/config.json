@@ -1,0 +1,33 @@
+{
+  "comment": "リズムゲーム環境の基本設定 (env.py が読み込みます)",
+  "judgments": {
+    "perfect": {
+      "range": 5,
+      "reward": 10000
+    },
+    "good": {
+      "range": 10,
+      "reward": 6000
+    },
+    "ok": {
+      "range": 20,
+      "reward": 4000
+    }
+  },
+  "penalties": {
+    "miss": -10,
+    "wrong_input": -5
+  },
+  "game_parameters": {
+    "note_speed": 5,
+    "num_lanes": 4,
+    "screen_width": 300,
+    "screen_height": 400,
+    "judgment_line_y": 350
+  },
+  "density_settings": {
+    "low": 200,
+    "medium": 150,
+    "high": 80
+  }
+}

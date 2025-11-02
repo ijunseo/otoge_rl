@@ -1,0 +1,37 @@
+#
+# otoge_rl_project: .gitignore
+#
+# このファイルは、Git のバージョン管理から除外するファイルやディレクトリを指定します。
+# 学習成果物、仮想環境、キャッシュファイルなどが対象です。
+#
+
+# --- 成果物 (Outputs) ---
+# 学習ログ、保存モデル、評価ビデオ、プロット画像など
+outputs/
+*.mp4
+*.zip
+
+# --- 仮想環境 (Virtual Environments) ---
+# uv が作成する仮想環境
+.venv/
+venv/
+ENV/
+
+# --- Python キャッシュ ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# --- IDE / OS ---
+.idea/
+.vscode/
+.DS_Store
+*.swp
+
+# --- その他 ---
+# ローカルの .env ファイル（APIキーなど）
+.env
+
+# 一時ファイル
+*.txt

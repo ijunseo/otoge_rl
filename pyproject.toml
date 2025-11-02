@@ -1,0 +1,68 @@
+#
+# otoge_rl_project: pyproject.toml
+#
+# V9.2 計画
+# このファイルは `uv` に対するプロジェクトのメタデータと依存関係を定義します。
+# 1. `[project]` : プロジェクトの基本情報。
+# 2. `[project.dependencies]` :
+#    - V8.7: `torch` を明示的に追加 (uv の競合状態を避けるため)。
+#    - V9.2: `tensorboard`, `tqdm`, `rich` を追加 (V8.7 での欠落を修正)。
+#    - V8.3: `opencv-python`, `ale-py` を追加 (sb3[extra] の代替)。
+# 3. `[project.optional-dependencies]` : `dev` グループに `ruff` (Linter/Formatter) を定義します。
+# 4. `[tool.setuptools.packages.find]` : `src` レイアウト (`src/otoge_rl_agent`) を uv が
+#    正しく認識できるように設定します。
+#
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "otoge_rl_agent"
+version = "0.1.0"
+description = "強化学習 (PPO) を用いたリズムゲームエージェント (V9.2 計画)"
+readme = "README.md"
+requires-python = ">=3.10" # PyTorch 2.x+ および SB3 の要件に基づ
+
+# --- (V9.2) 必須の依存関係 ---
+# V8.7: `torch` を明示的に含める
+# V9.2: `tensorboard`, `tqdm`, `rich` を追加
+dependencies = [
+    # 強化学習 (RL) コア
+    "stable-baselines3>=2.0.0",
+    "gymnasium>=1.2.1",       # (Jupyter Notebook で 1.2.0 を使用していたため)
+    "torch>=2.0.0",           # (V8.7) GPU版のインストールを容易にするため明示
+    "tensorboard",            # (V8.5) TensorBoard ロギングに必要
+    "tqdm",                   # (V9.2) `progress_bar=True` に必要
+    "rich",                   # (V9.2) `progress_bar=True` に必要
+
+    # ゲーム環境
+    "pygame>=2.6.0",
+
+    # ユーティリティ
+    "numpy>=1.21.0",
+    "pyyaml",                 # .json / .yaml 設定ファイル読み込み用
+    "imageio",                # evaluate.py での動画保存用
+    "imageio-ffmpeg",         # 動画保存用 (ffmpeg)
+    "matplotlib",             # main.py でのグラフ保存用
+
+    # (V8.3) sb3[extra] の代替 (torch, tensorboard, tqdm, rich 以外)
+    "opencv-python",
+    "ale-py"
+]
+
+# --- (V6) 開発用の依存関係 ---
+[project.optional-dependencies]
+dev = [
+    "ruff"  # Linter (lint) 兼 Formatter (fmt)
+]
+
+# --- (V7) `src` レイアウト設定 ---
+# `uv pip install -e .` が `src` フォルダを PYTHONPATH のルートとして
+# 認識するように設定します。
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.urls]
+"Repository" = "https://github.com/(ユーザー名)/(リポジトリ名)" # (後で更新してください)
+
